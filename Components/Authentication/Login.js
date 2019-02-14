@@ -1,16 +1,89 @@
 import React from 'react';
-import { StyleSheet, ImageBackground, View, Text, TextInput, AsyncStorage, Button, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, ImageBackground, Alert, View, Text, TextInput, AsyncStorage, Button, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
+
+
+// async function loginapi(query) {
+// try {
+// let response = await fetch(
+// 'https://facebook.github.io/react-native/movies.json',{
+// method: 'POST',
+// headers: {
+// Accept: 'application/json',
+// 'Content-Type': 'application/json',
+// },
+// body: JSON.stringify({
+// email: query["email"],
+// password: query["password"],
+// mobile: query["mobile"],
+// country_code: +91,
+// device_type: ios,
+// push_token: 111111111,
+// device_id: 000000
+// }),
+// }
+// );
+// let responseJson = await response.json();
+// return responseJson;
+// } catch (error) {
+// console.error(error);
+// return error
+// }
+// }
 
 export default class HomeScreen extends React.Component {
-
+  constructor() {
+    super();
+    this.state = {
+      password: '',
+      country_code: '+91',
+      email: '',
+      device_type: 'ios',
+      push_token: '111111111',
+      device_id: '000000'
+    }
+  }
   _onForgotPasswoordPressed(forgotRoute) {
     console.log('clicked')
     this.props.navigation.navigate('Forgot');
   }
 
   _onSignInPressed(nextRoute) {
-    AsyncStorage.setItem('userToken', 'abc');
-    this.props.navigation.navigate('Tabbar');
+    console.log(this.state)
+    var data = {
+      "email": this.state.email,
+      "password": this.state.password,
+      "country_code": this.state.country_code,
+      "device_type": this.state.device_type,
+      "push_token": this.state.push_token,
+      "device_id": this.state.device_id
+    }
+    fetch("http://18.221.230.142/archer/api/v1_0/users/login", {
+      method: "POST",
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then(function (data) {
+        if(data["responsecode"] == true) {
+          AsyncStorage.setItem('userToken', responsecode["LoginResponse"]);
+          this.props.navigation.navigate('Tabbar');
+        } else {
+          Alert.alert('Alert', data["MessageWhatHappen"], [{ text: 'Ok' }])
+        }
+      });
+
+    // var resp = await this.loginapi(this.state)
+    // if (resp.status == 200){
+    // var respBody = await resp.json();
+    // console.log('Fetch Todo response '+respBody);
+    // }
+    // AsyncStorage.setItem('userToken', 'abc');
+    // this.props.navigation.navigate('Tabbar');
   }
 
   _onFaceBookPressed = () => {
@@ -47,11 +120,11 @@ export default class HomeScreen extends React.Component {
             <View style={styles.container}>
               <Text style={styles.textBold}>Sign In</Text>
               <Text style={styles.textTitle}>Email / Phone number</Text>
-              <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="email@example.com" underlineColorAndroid="transparent" />
+              <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="email@example.com" underlineColorAndroid="transparent" onChangeText={(text) => this.state.email = text} />
               <View style={styles.horizontalLine}></View>
 
               <Text style={styles.textTitlePassword}>Password</Text>
-              <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="Password" underlineColorAndroid="transparent" />
+              <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="Password" underlineColorAndroid="transparent" onChangeText={(text) => this.state.password = text} />
               <View style={styles.horizontalLine}></View>
 
               <Button style={styles.buttonCenter} color='#F46C08' title="Forgot password" onPress={() => this._onForgotPasswoordPressed(forgotRoute)} />
