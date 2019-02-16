@@ -1,34 +1,6 @@
 import React from 'react';
-import { StyleSheet, ImageBackground, Alert, View, Text, TextInput, AsyncStorage, Button, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
-
-
-// async function loginapi(query) {
-// try {
-// let response = await fetch(
-// 'https://facebook.github.io/react-native/movies.json',{
-// method: 'POST',
-// headers: {
-// Accept: 'application/json',
-// 'Content-Type': 'application/json',
-// },
-// body: JSON.stringify({
-// email: query["email"],
-// password: query["password"],
-// mobile: query["mobile"],
-// country_code: +91,
-// device_type: ios,
-// push_token: 111111111,
-// device_id: 000000
-// }),
-// }
-// );
-// let responseJson = await response.json();
-// return responseJson;
-// } catch (error) {
-// console.error(error);
-// return error
-// }
-// }
+import { StyleSheet, ImageBackground, Alert, View, Text, TextInput, AsyncStorage, Button, TouchableOpacity, Image, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
+import YourRestApi from '../../ApiClass/RestClass'
 
 export default class HomeScreen extends React.Component {
   constructor() {
@@ -39,7 +11,8 @@ export default class HomeScreen extends React.Component {
       email: '',
       device_type: 'ios',
       push_token: '111111111',
-      device_id: '000000'
+      device_id: '000000',
+      isLoading: false
     }
   }
   _onForgotPasswoordPressed(forgotRoute) {
@@ -47,114 +20,106 @@ export default class HomeScreen extends React.Component {
     this.props.navigation.navigate('Forgot');
   }
 
+  responseHandle(response) {
+    this.setState({isLoading: false,})
+    if (response.responsecode == false) {
+      Alert.alert(response.MessageWhatHappen)
+    } else {
+      console.log(response.LoginResponse);
+      console.log(response.LoginResponse.first_name);
+     AsyncStorage.setItem('userData', JSON.stringify(response.LoginResponse));
+      this.props.navigation.navigate('Tabbar');
+    }
+  }
+
   _onSignInPressed(nextRoute) {
     console.log(this.state)
-    var data = {
-      "email": this.state.email,
-      "password": this.state.password,
-      "country_code": this.state.country_code,
-      "device_type": this.state.device_type,
-      "push_token": this.state.push_token,
-      "device_id": this.state.device_id
-    }
-    fetch("http://18.221.230.142/archer/api/v1_0/users/login", {
-      method: "POST",
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        if(data["responsecode"] == true) {
-          AsyncStorage.setItem('userToken', responsecode["LoginResponse"]);
-          this.props.navigation.navigate('Tabbar');
-        } else {
-          Alert.alert('Alert', data["MessageWhatHappen"], [{ text: 'Ok' }])
-        }
-      });
+    this.setState({isLoading: true,})
+    const api = new YourRestApi();
+    api.login(this.state.email, this.state.password, this.state.country_code, this.state.device_type, this.state.push_token, this.state.device_id)
+      .then(response =>  this.responseHandle(response))   // Successfully logged in
+      //.then(token => saveToken(token))    // Remember your credentials
+      .catch(err => alert(err.message));  // Catch any error
 
-    // var resp = await this.loginapi(this.state)
-    // if (resp.status == 200){
-    // var respBody = await resp.json();
-    // console.log('Fetch Todo response '+respBody);
-    // }
-    // AsyncStorage.setItem('userToken', 'abc');
-    // this.props.navigation.navigate('Tabbar');
+  };
+
+_onFaceBookPressed = () => {
+
+}
+
+_onGooglePressed = () => {
+
+}
+
+_onSIGNUPPressed(nextRoute) {
+  this.props.navigation.navigate('SignUp');
+}
+
+render() {
+  const signupRoute = {
+    component: 'SignUp',
+    navigationBarHidden: true,
+  };
+
+  const forgotRoute = {
+    component: 'Forgot',
+    navigationBarHidden: true,
+  };
+
+  const homeRoute = {
+    component: 'Tabbar',
+    navigationBarHidden: true,
+  };
+
+  if(this.state.isLoading){
+    return(
+      <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.2)',alignItems: 'center', justifyContent: 'center',}}>
+        <ActivityIndicator/>
+      </View>
+    )
   }
+  return (
+    <SafeAreaView>
+      <ImageBackground source={require('../../resources/bg.png')} style={{ width: '100%', height: '100%' }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={styles.container}>
+            <Text style={styles.textBold}>Sign In</Text>
+            <Text style={styles.textTitle}>Email / Phone number</Text>
+            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="email@example.com" underlineColorAndroid="transparent" onChangeText={(text) => this.state.email = text} />
+            <View style={styles.horizontalLine}></View>
 
-  _onFaceBookPressed = () => {
+            <Text style={styles.textTitlePassword}>Password</Text>
+            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="Password" underlineColorAndroid="transparent" onChangeText={(text) => this.state.password = text} />
+            <View style={styles.horizontalLine}></View>
 
-  }
+            <Button style={styles.buttonCenter} color='#F46C08' title="Forgot password" onPress={() => this._onForgotPasswoordPressed(forgotRoute)} />
+            <TouchableOpacity style={styles.buttonStyles} onPress={() => this._onSignInPressed(homeRoute)}>
+              <Text style={styles.titleButton}>Sign In</Text>
+            </TouchableOpacity>
+            <Text style={styles.titleBelow}>Or Sign in with</Text>
 
-  _onGooglePressed = () => {
-
-  }
-
-  _onSIGNUPPressed(nextRoute) {
-    this.props.navigation.navigate('SignUp');
-  }
-
-  render() {
-    const signupRoute = {
-      component: 'SignUp',
-      navigationBarHidden: true,
-    };
-
-    const forgotRoute = {
-      component: 'Forgot',
-      navigationBarHidden: true,
-    };
-
-    const homeRoute = {
-      component: 'Tabbar',
-      navigationBarHidden: true,
-    };
-    return (
-      <SafeAreaView>
-        <ImageBackground source={require('../../resources/bg.png')} style={{ width: '100%', height: '100%' }}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.container}>
-              <Text style={styles.textBold}>Sign In</Text>
-              <Text style={styles.textTitle}>Email / Phone number</Text>
-              <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="email@example.com" underlineColorAndroid="transparent" onChangeText={(text) => this.state.email = text} />
-              <View style={styles.horizontalLine}></View>
-
-              <Text style={styles.textTitlePassword}>Password</Text>
-              <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" placeholder="Password" underlineColorAndroid="transparent" onChangeText={(text) => this.state.password = text} />
-              <View style={styles.horizontalLine}></View>
-
-              <Button style={styles.buttonCenter} color='#F46C08' title="Forgot password" onPress={() => this._onForgotPasswoordPressed(forgotRoute)} />
-              <TouchableOpacity style={styles.buttonStyles} onPress={() => this._onSignInPressed(homeRoute)}>
-                <Text style={styles.titleButton}>Sign In</Text>
+            <View style={styles.titleBelow}>
+              <TouchableOpacity onPress={this._onFaceBookPressed}>
+                <Image style={styles.imageLogo}
+                  source={require('../../resources/fb.png')}
+                />
               </TouchableOpacity>
-              <Text style={styles.titleBelow}>Or Sign in with</Text>
-
-              <View style={styles.titleBelow}>
-                <TouchableOpacity onPress={this._onFaceBookPressed}>
-                  <Image style={styles.imageLogo}
-                    source={require('../../resources/fb.png')}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={this._onGooglePressed}>
-                  <Image style={styles.imageLogo}
-                    source={require('../../resources/google.png')}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.titleBelow}>
-                <Text style={styles.titleBelow}>Do not have an account? </Text>
-                <Button style={styles.buttonCenter} color='#F46C08' title="SIGN UP" onPress={() => this._onSIGNUPPressed(signupRoute)} />
-              </View>
+              <TouchableOpacity onPress={this._onGooglePressed}>
+                <Image style={styles.imageLogo}
+                  source={require('../../resources/google.png')}
+                />
+              </TouchableOpacity>
             </View>
-          </ScrollView>
-        </ImageBackground>
-      </SafeAreaView>
-    );
-  }
+            <View style={styles.titleBelow}>
+              <Text style={styles.titleBelow}>Do not have an account? </Text>
+              <Button style={styles.buttonCenter} color='#F46C08' title="SIGN UP" onPress={() => this._onSIGNUPPressed(signupRoute)} />
+            </View>
+          </View>
+        </ScrollView>
+      </ImageBackground>
+    </SafeAreaView>
+  );
+}
 };
 
 var styles = StyleSheet.create({

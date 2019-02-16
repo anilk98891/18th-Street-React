@@ -21,10 +21,24 @@ const itemArray = [{
   }];
 
 export default class Home extends React.Component {
+    componentWillMount() {
+       // retrieveItem()
+    }
 
     _onSIGNINPressed() {
         this.props.navigation.openDrawer();
     }
+
+    //  retrieveItem() {
+    //     try {
+    //       const retrievedItem = AsyncStorage.getItem('userData');
+    //       console.log(retrievedItem)
+    //       console.log(item)
+    //       return item;
+    //     } catch (error) {
+    //       console.log(error.message);
+    //     }
+    // }
 
     renderItem = ({ item }) => { return (<CustomRow
             title={item.title}
