@@ -1,47 +1,54 @@
 import React from 'react';
-import { StyleSheet, ImageBackground, View, Text, TextInput, FlatList, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { StyleSheet, ImageBackground, View, Text, ActivityIndicator, FlatList, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import CustomRow from '../CustomView/Eventrow';
 import dataArray from '../Model/ArrayList'
-
-const itemArray = [{
-    key: 1, title: 'Mar \n 30',
-    description: 'Local Photography \n Gurgaon',
-    image_url: 'http://vivirtupasion.com/wp-content/uploads/2016/05/DANI_PERFILzoomCircle.png'
-  },
-  {
-    key: 2,
-    title: 'Mar \n 31',
-    description: 'Local Photography again \n Gurgaon ',
-    image_url: 'http://3.bp.blogspot.com/-jd5x3rFRLJc/VngrSWSHcjI/AAAAAAAAGJ4/ORPqZNDpQoY/s1600/Profile%2Bcircle.png'
-  },
-  {
-    key: 3, title: 'Mar \n 31',
-    description: 'Local Photography again \n Yol cantt HP ',
-    image_url: 'http://vivirtupasion.com/wp-content/uploads/2016/05/DANI_PERFILzoomCircle.png'
-  }];
+import YourRestApi from '../../ApiClass/RestClass'
 
 export default class Home extends React.Component {
-    componentWillMount() {
-       // retrieveItem()
+    constructor() {
+        super();
+        this.state = {
+            airports: [{
+                id: '',
+                name: '',
+                code: '',
+                country: '',
+                city: '',
+                timezone: ''
+            }]
+        }
     }
+
+    componentWillMount() {
+        this.retrieveItem()
+    }
+
+    responseHandle(response) {
+        this.setState({ isLoading: false, })
+        if (response.responsecode == false) {
+            Alert.alert(response.MessageWhatHappen)
+        } else {
+            this.setState({
+                airports: response.airports
+            });
+            console.log(this.state.airports)
+        }
+    }
+
+    retrieveItem() {
+        this.setState({isLoading: true,})
+        const api = new YourRestApi();
+        api.getAirportData()
+          .then(response =>  this.responseHandle(response))   // Successfully logged in
+          .catch(err => alert(err.message));  // Catch any error
+      };
 
     _onSIGNINPressed() {
         this.props.navigation.openDrawer();
     }
 
-    //  retrieveItem() {
-    //     try {
-    //       const retrievedItem = AsyncStorage.getItem('userData');
-    //       console.log(retrievedItem)
-    //       console.log(item)
-    //       return item;
-    //     } catch (error) {
-    //       console.log(error.message);
-    //     }
-    // }
-
     renderItem = ({ item }) => { return (<CustomRow
-            title={item.title}
+            title={item.name}
             description={item.description}
             image_url={item.image_url}
         />
@@ -49,7 +56,13 @@ export default class Home extends React.Component {
     };
 
     render() {
-
+        if(this.state.isLoading){
+            return(
+              <View style={{flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.2)',alignItems: 'center', justifyContent: 'center',}}>
+                <ActivityIndicator/>
+              </View>
+            )
+          }
         return (
             <SafeAreaView>
                 <ImageBackground source={require('../../resources/Tabbar/circlebg.png')} style={{ width: '100%', height: '100%' }}>
@@ -58,7 +71,7 @@ export default class Home extends React.Component {
                             <Image style={styles.backButton} source={require('../../resources/Tabbar/menu.png')} />
                         </TouchableOpacity>
                         <FlatList
-                            data={itemArray}
+                            data={this.state.airports}
                             renderItem={this.renderItem}
                         />
                     </View>

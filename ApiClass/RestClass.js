@@ -10,10 +10,11 @@ export default class YourRestApi extends RestClient {
     // Returns a Promise with the response.
     return this.POST('/users/login', { email, password,country_code,device_type,push_token,device_id });
   }
-  getCurrentUser () {
+
+  getAirportData() {
     // If the request is successful, you can return the expected object
     // instead of the whole response.
-    return this.GET('/auth')
-      .then(response => response.user);
+    return this.GET('/airports/get')
+      .then(response => response);
   }
 };

@@ -17,6 +17,8 @@ export default class EditProfile extends React.Component {
     }
 
     render() {
+        const { navigation } = this.props;
+        const userdata = navigation.getParam('userdata', 'NO-ID');
 
         return (
             <SafeAreaView>
@@ -34,19 +36,19 @@ export default class EditProfile extends React.Component {
                             </TouchableOpacity>
                         </View>
                         <Text style={styles.textTitle2}>Name</Text>
-                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value="Anil Kumar" underlineColorAndroid="transparent" />
+                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value={userdata.first_name + " " + userdata.last_name} underlineColorAndroid="transparent" />
                         <View style={styles.horizontalLine}></View>
 
                         <Text style={styles.textTitle}>Email</Text>
-                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value="email@example.com" underlineColorAndroid="transparent" />
+                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value={userdata.email} underlineColorAndroid="transparent" />
                         <View style={styles.horizontalLine}></View>
 
                         <Text style={styles.textTitle}>Phone</Text>
-                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value="+91 7018252694" underlineColorAndroid="transparent" />
+                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value={userdata.mobile} underlineColorAndroid="transparent" />
                         <View style={styles.horizontalLine}></View>
 
                         <Text style={styles.textTitle}>Location</Text>
-                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value="Gurgaon" underlineColorAndroid="transparent" />
+                        <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" value={userData.country} underlineColorAndroid="transparent" />
                         <View style={styles.horizontalLine}></View>
 
                         <Text style={styles.textTitle}>Bio</Text>

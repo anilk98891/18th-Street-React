@@ -1,14 +1,50 @@
 import React from 'react';
-import { StyleSheet, ImageBackground, View, Text, TextInput, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, ImageBackground, View, Text, TextInput, TouchableOpacity, Image, ScrollView, AsyncStorage, SafeAreaView } from 'react-native';
 
 export default class Profile extends React.Component {
+    constructor() {
+        super();
+        this.state = {
+            results: {
+                password: '',
+                country_code: '',
+                email: '',
+                device_type: '',
+                first_name: '',
+                last_name: '',
+                mobile: '',
+                type: '',
+                user_image: '',
+                country: '',
+                bio: '',
+            }
+        }
+    }
 
     _onSIGNINPressed() {
         this.props.navigation.openDrawer();
     }
-    
-    render() {
 
+    componentDidMount() {
+        this.retrieveItem()
+    }
+
+    retrieveItem(){
+        try {
+            AsyncStorage.getItem('userData', (err, data) => {
+                console.log(data)
+                const parsedData = JSON.parse(data);
+                this.setState({
+                    results: parsedData
+                });
+        })
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
+    render() {
+        userData = this.state.results
         return (
             <SafeAreaView>
                 <ImageBackground source={require('../../resources/Tabbar/circlebg.png')} style={{ width: '100%', height: '100%' }}>
@@ -20,27 +56,28 @@ export default class Profile extends React.Component {
                         <View style={styles.subcontainer}>
                             <View style={styles.container}>
                                 <Image style={styles.imageLogo} source={require('../../resources/profilepic.png')} />
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Edit')}>
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Edit', {
+                                    userdata: userData})}>
                                     <Image style={styles.editImage} source={require('../../resources/editProfile.png')} />
                                 </TouchableOpacity>
                             </View>
                             <Text style={styles.textTitle2}>Name</Text>
-                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value="Anil Kumar" underlineColorAndroid="transparent" />
+                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value= {userData.first_name + " " + userData.last_name} underlineColorAndroid="transparent" />
                             <View style={styles.horizontalLine}></View>
 
                             <Text style={styles.textTitle}>Email</Text>
-                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value="email@example.com" underlineColorAndroid="transparent" />
+                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value={userData.email} underlineColorAndroid="transparent" />
                             <View style={styles.horizontalLine}></View>
 
                             <Text style={styles.textTitle}>Phone</Text>
-                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value="+91 7018252694" underlineColorAndroid="transparent" />
+                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value={userData.mobile} underlineColorAndroid="transparent" />
                             <View style={styles.horizontalLine}></View>
 
                             <Text style={styles.textTitle}>Location</Text>
-                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value="Gurgaon" underlineColorAndroid="transparent" />
+                            <TextInput style={styles.textInputPlaceholder} placeholderTextColor="#333333" editable={false} value={userData.country} underlineColorAndroid="transparent" />
                             <View style={styles.horizontalLine}></View>
 
-                            <Text style={styles.textTitle}>Bio</Text>
+                            <Text style={styles.textTitle}>{userData.bio}</Text>
                             <TextInput style={styles.textBio} placeholderTextColor="#333333" underlineColorAndroid="transparent" />
 
                         </View>

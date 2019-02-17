@@ -13,7 +13,7 @@ export default class drawerContentComponents extends Component {
     })
 
   navigationSignOut = () => {
-    AsyncStorage.clear();
+    AsyncStorage.removeItem('userToken')
     this.props.navigation.navigate('Auth');
   }
 
